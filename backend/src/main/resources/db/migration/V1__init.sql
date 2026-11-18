@@ -24,7 +24,7 @@ CREATE TABLE cities (
     created_at DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     PRIMARY KEY (id),
     UNIQUE KEY uk_city_slug (slug)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE areas (
     id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -36,7 +36,7 @@ CREATE TABLE areas (
     UNIQUE KEY uk_area_city_slug (city_id, slug),
     KEY idx_area_city (city_id),
     CONSTRAINT fk_area_city FOREIGN KEY (city_id) REFERENCES cities (id)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- Canonical direction only: the smaller area id goes in area_a_id.
 -- "adjacent to X" is queried as:
@@ -50,7 +50,7 @@ CREATE TABLE area_adjacency (
     CONSTRAINT ck_adj_order CHECK (area_a_id < area_b_id),
     CONSTRAINT fk_adj_a FOREIGN KEY (area_a_id) REFERENCES areas (id) ON DELETE CASCADE,
     CONSTRAINT fk_adj_b FOREIGN KEY (area_b_id) REFERENCES areas (id) ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Users & auth
@@ -70,7 +70,7 @@ CREATE TABLE users (
     UNIQUE KEY uk_user_phone (phone),
     CONSTRAINT ck_user_gender CHECK (gender IN ('MALE', 'FEMALE', 'OTHER', 'UNDISCLOSED')),
     CONSTRAINT ck_user_status CHECK (status IN ('ACTIVE', 'SUSPENDED', 'DELETED'))
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- Never store the raw OTP. code_hash = SHA-256(phone || code || server_pepper).
 CREATE TABLE otp_codes (
@@ -84,7 +84,7 @@ CREATE TABLE otp_codes (
     PRIMARY KEY (id),
     KEY idx_otp_phone_created (phone, created_at DESC),
     KEY idx_otp_expiry (expires_at)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- Refresh-token rotation: on refresh, the old row is revoked and replaced_by
 -- points at the new row. A reused revoked token means theft -> revoke the chain.
@@ -100,7 +100,7 @@ CREATE TABLE refresh_tokens (
     UNIQUE KEY uk_refresh_hash (token_hash),
     KEY idx_refresh_user (user_id),
     CONSTRAINT fk_refresh_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Onboarding profile — every matching input is an enum or a small int
@@ -155,7 +155,7 @@ CREATE TABLE profiles (
     CONSTRAINT ck_prof_drinktol CHECK (drink_tolerance IN ('DONT_MIND', 'RATHER_NOT')),
     CONSTRAINT ck_prof_pets    CHECK (pets IN ('NONE', 'HAVE', 'WANT')),
     CONSTRAINT ck_prof_pettol  CHECK (pet_tolerance IN ('DONT_MIND', 'NO_PETS'))
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Match requests — the pool-exclusion rule lives here
@@ -181,7 +181,7 @@ CREATE TABLE match_requests (
     CONSTRAINT ck_request_status CHECK (status IN ('PENDING', 'ACCEPTED', 'DECLINED', 'WITHDRAWN', 'EXPIRED')),
     CONSTRAINT fk_request_from FOREIGN KEY (from_user_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT fk_request_to   FOREIGN KEY (to_user_id)   REFERENCES users (id) ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Conversations — created only when a request is ACCEPTED
@@ -204,7 +204,7 @@ CREATE TABLE conversations (
     CONSTRAINT fk_conv_request FOREIGN KEY (request_id) REFERENCES match_requests (id),
     CONSTRAINT fk_conv_a FOREIGN KEY (user_a_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT fk_conv_b FOREIGN KEY (user_b_id) REFERENCES users (id) ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Messages — idempotent via (conversation_id, client_msg_id)
@@ -224,7 +224,7 @@ CREATE TABLE messages (
     CONSTRAINT fk_msg_conv FOREIGN KEY (conversation_id) REFERENCES conversations (id) ON DELETE CASCADE,
     CONSTRAINT fk_msg_sender FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT ck_msg_body_len CHECK (CHAR_LENGTH(body) BETWEEN 1 AND 2000)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- Unread is DERIVED from this cursor. There is no unread counter column.
 CREATE TABLE read_cursors (
@@ -235,4 +235,4 @@ CREATE TABLE read_cursors (
     PRIMARY KEY (conversation_id, user_id),
     CONSTRAINT fk_cursor_conv FOREIGN KEY (conversation_id) REFERENCES conversations (id) ON DELETE CASCADE,
     CONSTRAINT fk_cursor_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;

@@ -1,5 +1,5 @@
 // Seeds demo accounts + profiles. Safe to re-run: existing emails just log in.
-const BASE = 'http://localhost:8080';
+const BASE = process.env.BASE ?? 'http://localhost:8080';
 
 async function call(path, { method = 'GET', token, body } = {}) {
   const res = await fetch(BASE + path, {

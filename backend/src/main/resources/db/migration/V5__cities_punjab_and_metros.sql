@@ -15,8 +15,6 @@ DELETE FROM profiles;
 DELETE FROM area_adjacency;
 DELETE FROM areas;
 DELETE FROM cities;
-ALTER TABLE cities AUTO_INCREMENT = 1;
-ALTER TABLE areas AUTO_INCREMENT = 1;
 
 INSERT INTO cities (name, slug) VALUES
     ('Chandigarh', 'chandigarh'),

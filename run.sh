@@ -46,7 +46,7 @@ if pgrep -f "cloudflared tunnel --url http://localhost:8080" >/dev/null 2>&1; th
 else
   echo "→ opening public tunnel"
   TUNNEL_LOG="$LOG_DIR/tunnel.log"
-  nohup cloudflared tunnel --url http://localhost:8080 --no-autoupdate > "$TUNNEL_LOG" 2>&1 &
+  nohup cloudflared tunnel --url http://localhost:8080 --no-autoupdate --protocol http2 > "$TUNNEL_LOG" 2>&1 &
   for _ in $(seq 1 40); do
     URL=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$TUNNEL_LOG" 2>/dev/null | head -1 || true)
     [[ -n "${URL:-}" ]] && break
@@ -63,3 +63,5 @@ echo "    asha@example.com    bilal@example.com    esha@example.com"
 echo "    farhan@example.com  gita@example.com     chetan@example.com"
 echo
 echo "  The public URL lives only while this machine and cloudflared stay awake."
+echo "  If the URL does not open on THIS Mac, flush the stale DNS cache:"
+echo "    sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder"
