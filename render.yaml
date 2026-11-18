@@ -1,5 +1,11 @@
 # Render blueprint — free web service running the API container.
-# Deploy: push this repo to GitHub, then Render → New → Blueprint.
+# Deploy: Render -> New -> Blueprint -> pick this repo.
+#
+# The database credentials below point at a TiDB Cloud Serverless cluster
+# (MySQL 8.5 compatible) and use a RESTRICTED user that can only touch the
+# `flatmate` schema. They are committed so the blueprint can apply them
+# without a masked-input round trip — rotate them in TiDB if this repo is
+# ever public with real data.
 services:
   - type: web
     name: flatmate-api
@@ -11,11 +17,11 @@ services:
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
-        sync: false          # paste the Aiven JDBC URL
+        value: "jdbc:mysql://gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000/flatmate?sslMode=REQUIRED&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true&characterEncoding=utf8"
       - key: DB_USER
-        sync: false
+        value: "4PtP6jdhdQCCnrD.flatmate_app"
       - key: DB_PASSWORD
-        sync: false
+        value: "FlatmateApp2026!"
       - key: JWT_SECRET
         generateValue: true
       - key: DB_POOL
