@@ -1,0 +1,81 @@
+spring:
+  application:
+    name: flatmate-api
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/flatmate?useSSL=false&allowPublicKeyRetrieval=true&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true&characterEncoding=utf8}
+    username: ${DB_USER:flatmate}
+    password: ${DB_PASSWORD:flatmate}
+    hikari:
+      maximum-pool-size: ${DB_POOL:10}
+      minimum-idle: 2
+      connection-timeout: 5000
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate          # Flyway owns the schema. Never update.
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        format_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: never
+
+app:
+  # ---------------------------------------------------------------- jwt
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789abcdef0123456789abcdef}
+    access-ttl-minutes: 15
+    refresh-ttl-days: 30
+    issuer: flatmate
+
+  # ---------------------------------------------------------------- chat
+  chat:
+    max-messages-per-minute: 20
+    max-body-length: 2000
+    history-page-size: 50
+    block-contact-info: ${BLOCK_CONTACT_INFO:false}   # true = reject phone numbers/links in chat
+
+  # ---------------------------------------------------------------- matching
+  matching:
+    top-n: 20
+    max-open-requests-per-user: 10
+    request-ttl-days: 7
+    weights:
+      sleep: 13
+      cleanliness: 13
+      area: 12
+      budget: 11
+      guests: 10
+      move_in: 8
+      social: 8
+      food: 8
+      smoking: 6
+      work_from_home: 6
+      pets: 5
+
+logging:
+  level:
+    in.flatmate: INFO
+    org.flywaydb: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

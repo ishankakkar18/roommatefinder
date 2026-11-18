@@ -1,0 +1,24 @@
+# Render blueprint — free web service running the API container.
+# Deploy: push this repo to GitHub, then Render → New → Blueprint.
+services:
+  - type: web
+    name: flatmate-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: singapore
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false          # paste the Aiven JDBC URL
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_POOL
+        value: "3"
+      - key: JAVA_TOOL_OPTIONS
+        value: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC"
